@@ -68,4 +68,5 @@ type DriverResult struct {
 	Constructor  string
 	Time         string
 	Status       string
+	Points       string
 }

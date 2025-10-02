@@ -78,7 +78,7 @@ func (m Model) View() string {
 	right := rightTitle + m.tbl.View()
 
 	// Footer
-	footer := LabelStyle.Render("←/→ switch GP • Enter open results • c circuit • r refresh • q quit")
+	footer := LabelStyle.Render("←/→ switch GP • ↑/↓ sessions • Enter view results • c circuit • r refresh • q quit")
 
 	// Layout
 	gap := 3
@@ -94,22 +94,31 @@ func (m Model) View() string {
 }
 
 func (m Model) renderResultsView() string {
-	if m.resultsView.Loading {
-		return TitleStyle.Render("Loading Results...") + "\n" +
-			LabelStyle.Render("Fetching session data...")
-	}
+    if m.resultsView.Loading {
+        return TitleStyle.Render("Loading Results...") + "\n" +
+            LabelStyle.Render("Fetching session data...")
+    }
 
-	if m.resultsView.Error != nil {
-		return TitleStyle.Render(m.resultsView.RaceName) + "\n" +
-			GPStyle.Render(m.resultsView.SessionName) + "\n\n" +
-			ErrorStyle.Render(m.resultsView.Error.Error()) + "\n\n" +
-			LabelStyle.Render("Press ESC or Q to go back")
-	}
+    if m.resultsView.Error != nil {
+        // Check if race is currently live
+        now := time.Now()
+        isLive := now.After(m.race.Start) && now.Before(m.race.End)
 
-	header := TitleStyle.Render(m.resultsView.RaceName) + "\n" +
-		GPStyle.Render(m.resultsView.SessionName + " Results") + "\n\n"
+        errorMsg := m.resultsView.Error.Error()
+        if isLive && m.resultsView.SessionName == "Race" {
+            errorMsg = "Live timing not available - results will appear after race completion"
+        }
 
-	footer := "\n\n" + LabelStyle.Render("↑/↓ scroll • ESC/Q go back • Ctrl+C quit")
+        return TitleStyle.Render(m.resultsView.RaceName) + "\n" +
+            GPStyle.Render(m.resultsView.SessionName) + "\n\n" +
+            LabelStyle.Render(errorMsg) + "\n\n" +
+            LabelStyle.Render("Press ESC or Q to go back")
+    }
 
-	return header + m.resultsTbl.View() + footer
+    header := TitleStyle.Render(m.resultsView.RaceName) + "\n" +
+        GPStyle.Render(m.resultsView.SessionName + " Results") + "\n\n"
+
+    footer := "\n\n" + LabelStyle.Render("↑/↓ scroll • ESC/Q go back • Ctrl+C quit")
+
+    return header + m.resultsTbl.View() + footer
 }

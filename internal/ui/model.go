@@ -64,6 +64,7 @@ func InitialModel() Model {
 		{Title: "Driver", Width: 20},
 		{Title: "Team", Width: 22},
 		{Title: "Time", Width: 12},
+		{Title: "Pts", Width: 4},
 	}
 	resultsTbl := table.New(table.WithColumns(resultColumns), table.WithFocused(true))
 	resultsTbl.SetHeight(20)
@@ -124,39 +125,43 @@ func (m *Model) selectIndex(i int) {
 }
 
 func (m *Model) rebuild() {
-	if len(m.races) == 0 {
-		return
-	}
+    if len(m.races) == 0 {
+        return
+    }
 
-	r := m.races[m.idx]
-	sessions, race, err := utils.BuildUISessions(r, r.Season, r.Round, api.ResultsURL)
-	if err != nil {
-		m.err = err
-		return
-	}
+    r := m.races[m.idx]
+    sessions, race, err := utils.BuildUISessions(r, r.Season, r.Round, api.ResultsURL)
+    if err != nil {
+        m.err = err
+        return
+    }
 
-	m.err = nil
-	m.season = r.Season
-	m.sessions = nil
-	for _, s := range sessions {
-		m.sessions = append(m.sessions, models.SessionRow{
-			Title: s.Kind,
-			Time:  s.Start.Format("Mon 15:04 - 16:04"),
-		})
-	}
+    m.err = nil
+    m.season = r.Season
+    m.sessions = nil
 
-	// Build table rows
-	var rows []table.Row
-	for _, s := range sessions {
-		rows = append(rows, table.Row{
-			s.Kind,
-			s.Start.Format("Jan _2 Mon 15:04") + " - " + s.End.Format("15:04"),
-		})
-	}
+    // Add all sessions including Race
+    allSessions := append(sessions, race)  // Add Race to the list
 
-	m.tbl.SetRows(rows)
-	m.tbl.GotoTop()
-	m.race = race
+    for _, s := range allSessions {
+        m.sessions = append(m.sessions, models.SessionRow{
+            Title: s.Kind,
+            Time:  s.Start.Format("Mon 15:04 - 16:04"),
+        })
+    }
+
+    // Build table rows
+    var rows []table.Row
+    for _, s := range allSessions {  // Changed from sessions to allSessions
+        rows = append(rows, table.Row{
+            s.Kind,
+            s.Start.Format("Jan _2 Mon 15:04") + " - " + s.End.Format("15:04"),
+        })
+    }
+
+    m.tbl.SetRows(rows)
+    m.tbl.GotoTop()
+    m.race = race
 }
 
 func pickRelevantIndex(races []models.Race) int {

@@ -68,24 +68,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case resultsMsg:
-		m.resultsView.Loading = false
-		m.resultsView.Results = msg.results
-		m.resultsView.SessionName = msg.sessionName
-		m.resultsView.RaceName = msg.raceName
+	    m.resultsView.Loading = false
+	    m.resultsView.Results = msg.results
+	    m.resultsView.SessionName = msg.sessionName
+	    m.resultsView.RaceName = msg.raceName
 
-		// Build table rows
-		rows := []table.Row{}
-		for _, res := range msg.results {
-			rows = append(rows, table.Row{
-				res.Position,
-				res.Driver,
-				res.Constructor,
-				res.Time,
-			})
-		}
-		m.resultsTbl.SetRows(rows)
-		m.resultsTbl.GotoTop()
-		return m, nil
+	    // Build table rows
+	    rows := []table.Row{}
+	    for _, res := range msg.results {
+	        rows = append(rows, table.Row{
+	            res.Position,
+	            res.Driver,
+	            res.Constructor,
+	            res.Time,
+	            res.Points,  // Add points column
+	        })
+	    }
+	    m.resultsTbl.SetRows(rows)
+	    m.resultsTbl.GotoTop()
+	    return m, nil
 
 	case resultsErrMsg:
 		m.resultsView.Loading = false
