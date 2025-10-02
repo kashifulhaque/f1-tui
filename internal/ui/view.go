@@ -29,8 +29,18 @@ func (m Model) View() string {
 	r := m.races[m.idx]
 
 	// Left pane
+	countryCode := utils.CountryNameToCode(
+		r.Circuit.Location.Country,
+		r.RaceName,
+		r.Circuit.CircuitName,
+	)
+	flag := ""
+	if countryCode != "" {
+		flag = utils.CountryCodeToFlag(countryCode) + " "
+	}
+
 	left := RoundBadge.Render(fmt.Sprintf("ROUND %s", r.Round)) + "\n" +
-			GPStyle.Render(fmt.Sprintf("%s", r.RaceName)) + "\n" +
+			GPStyle.Render(fmt.Sprintf("%s%s", flag, r.RaceName)) + "\n" +
 			LabelStyle.Render(fmt.Sprintf("%s", r.Circuit.CircuitName)) + "\n"
 
 
