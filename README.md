@@ -68,6 +68,16 @@ Contributions are welcome! Feel free to submit issues or pull requests to enhanc
 
 ---
 
+## Release
+
+To create a release:
+```shell
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+---
+
 ## License
 
 MIT License © 2025
