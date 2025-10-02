@@ -28,6 +28,12 @@ F1 TUI is a terminal-based application providing a rich interactive user interfa
 
 ---
 
+## Download
+
+Get the compiled binaries from [releases page](https://github.com/kashifulhaque/f1-tui/releases)
+
+---
+
 ## Installation
 
 Ensure you have Go 1.20+ installed. Clone the repo and use `go run` to start:
