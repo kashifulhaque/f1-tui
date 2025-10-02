@@ -61,9 +61,9 @@ func InitialModel() Model {
 	// Results table
 	resultColumns := []table.Column{
 		{Title: "Pos", Width: 4},
-		{Title: "Driver", Width: 20},
+		{Title: "Driver", Width: 24},
 		{Title: "Team", Width: 22},
-		{Title: "Time", Width: 12},
+		{Title: "Time", Width: 16},
 		{Title: "Pts", Width: 4},
 	}
 	resultsTbl := table.New(table.WithColumns(resultColumns), table.WithFocused(true))

@@ -29,9 +29,9 @@ func (m Model) View() string {
 	r := m.races[m.idx]
 
 	// Left pane
-	left := RoundBadge.Render(fmt.Sprintf("ROUND %s", r.Round)) + "\n\n" +
+	left := RoundBadge.Render(fmt.Sprintf("ROUND %s", r.Round)) + "\n" +
 			GPStyle.Render(fmt.Sprintf("%s", r.RaceName)) + "\n" +
-			LabelStyle.Render(fmt.Sprintf("%s", r.Circuit.CircuitName)) + "\n\n"
+			LabelStyle.Render(fmt.Sprintf("%s", r.Circuit.CircuitName)) + "\n"
 
 
 	// Race card
@@ -45,7 +45,7 @@ func (m Model) View() string {
 	left += card.Render(
 		TitleStyle.Margin(0).Render(raceHeader) + "\n" +
 			lipgloss.NewStyle().Bold(true).Render(m.race.Start.Format("Jan 2 Mon 15:04")),
-	) + "\n\n" + LabelStyle.Render("Enter on \"Race\" opens results – live view later")
+	)
 
 	// Circuit pane (optional)
 	circuit := ""
@@ -110,15 +110,15 @@ func (m Model) renderResultsView() string {
         }
 
         return TitleStyle.Render(m.resultsView.RaceName) + "\n" +
-            GPStyle.Render(m.resultsView.SessionName) + "\n\n" +
-            LabelStyle.Render(errorMsg) + "\n\n" +
+            GPStyle.Render(m.resultsView.SessionName) + "\n" +
+            LabelStyle.Render(errorMsg) + "\n" +
             LabelStyle.Render("Press ESC or Q to go back")
     }
 
     header := TitleStyle.Render(m.resultsView.RaceName) + "\n" +
         GPStyle.Render(m.resultsView.SessionName + " Results") + "\n\n"
 
-    footer := "\n\n" + LabelStyle.Render("↑/↓ scroll • ESC/Q go back • Ctrl+C quit")
+    footer := "\n" + LabelStyle.Render("↑/↓ scroll • ESC/Q go back • Ctrl+C quit")
 
     return header + m.resultsTbl.View() + footer
 }
