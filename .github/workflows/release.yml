@@ -1,0 +1,60 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Runs on version tags like v1.0.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.20'
+
+    - name: Build binary
+      run: |
+        GOOS=linux GOARCH=amd64 go build -o f1-tui-linux-amd64
+        GOOS=windows GOARCH=amd64 go build -o f1-tui-windows-amd64.exe
+        GOOS=darwin GOARCH=amd64 go build -o f1-tui-darwin-amd64
+
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload release assets
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./f1-tui-linux-amd64
+        asset_name: f1-tui-linux-amd64
+        asset_content_type: application/octet-stream
+
+    - name: Upload release assets (Windows)
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./f1-tui-windows-amd64.exe
+        asset_name: f1-tui-windows-amd64.exe
+        asset_content_type: application/octet-stream
+
+    - name: Upload release assets (macOS)
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./f1-tui-darwin-amd64
+        asset_name: f1-tui-darwin-amd64
+        asset_content_type: application/octet-stream
