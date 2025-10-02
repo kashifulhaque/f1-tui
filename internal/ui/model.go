@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"strconv"
 	"context"
 	"sort"
 	"time"
@@ -194,7 +195,13 @@ func filterAndSortRaces(in []models.Race) []models.Race {
 	}
 
 	sort.Slice(out, func(i, j int) bool {
-		return out[i].Round < out[j].Round
+		ri, err1 := strconv.Atoi(out[i].Round)
+		rj, err2 := strconv.Atoi(out[j].Round)
+		if err1 != nil || err2 != nil {
+			// fallback to string comparison if atoi fails
+			return out[i].Round < out[j].Round
+		}
+		return ri < rj
 	})
 	return out
 }
