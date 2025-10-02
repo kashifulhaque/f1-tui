@@ -57,7 +57,7 @@ func (m Model) View() string {
 			lipgloss.NewStyle().Bold(true).Render(m.race.Start.Format("Jan 2 Mon 15:04")),
 	)
 
-	// Circuit pane (optional)
+	// Circuit pane
 	circuit := ""
 	if m.showCircuit {
 		c := r.Circuit

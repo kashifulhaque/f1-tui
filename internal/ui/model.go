@@ -27,13 +27,11 @@ type Model struct {
 	showCircuit   bool
 	filter        textinput.Model
 
-	// New fields for results view
 	showResults   bool
 	resultsView   models.ResultsView
 	resultsTbl    table.Model
 }
 
-// Messages
 type dataMsg struct {
 	season string
 	races  []models.Race
@@ -50,7 +48,6 @@ type errMsg struct{ err error }
 type refreshMsg struct{}
 type toggleCircuitMsg struct{}
 
-// InitialModel creates the initial model state
 func InitialModel() Model {
 	columns := []table.Column{
 		{Title: "Session", Width: 18},
@@ -59,7 +56,6 @@ func InitialModel() Model {
 	t := table.New(table.WithColumns(columns), table.WithFocused(true))
 	t.SetHeight(9)
 
-	// Results table
 	resultColumns := []table.Column{
 		{Title: "Pos", Width: 4},
 		{Title: "Driver", Width: 24},
@@ -141,8 +137,7 @@ func (m *Model) rebuild() {
     m.season = r.Season
     m.sessions = nil
 
-    // Add all sessions including Race
-    allSessions := append(sessions, race)  // Add Race to the list
+    allSessions := append(sessions, race)
 
     for _, s := range allSessions {
         m.sessions = append(m.sessions, models.SessionRow{
@@ -151,9 +146,8 @@ func (m *Model) rebuild() {
         })
     }
 
-    // Build table rows
     var rows []table.Row
-    for _, s := range allSessions {  // Changed from sessions to allSessions
+    for _, s := range allSessions {
         rows = append(rows, table.Row{
             s.Kind,
             s.Start.Format("Jan _2 Mon 15:04") + " - " + s.End.Format("15:04"),
@@ -198,7 +192,6 @@ func filterAndSortRaces(in []models.Race) []models.Race {
 		ri, err1 := strconv.Atoi(out[i].Round)
 		rj, err2 := strconv.Atoi(out[j].Round)
 		if err1 != nil || err2 != nil {
-			// fallback to string comparison if atoi fails
 			return out[i].Round < out[j].Round
 		}
 		return ri < rj

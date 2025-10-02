@@ -2,7 +2,6 @@ package utils
 
 import "strings"
 
-// countryCodeToFlag converts ISO 3166-1 alpha-2 country code to flag emoji
 func CountryCodeToFlag(code string) string {
 	if len(code) != 2 {
 		return ""
@@ -15,7 +14,6 @@ func CountryCodeToFlag(code string) string {
 	return string([]rune{r1, r2})
 }
 
-// countryNameToCode maps common country names to ISO codes (add as many as needed)
 func CountryNameToCode(name, gpName, circuitName string) string {
 	m := map[string]string{
 		"Australia":            "AU",
@@ -44,12 +42,10 @@ func CountryNameToCode(name, gpName, circuitName string) string {
 		"United States":        "US",
 	}
 
-	// First try by country name
 	if code, ok := m[name]; ok {
 		return code
 	}
 
-	// Fallback: detect from GP name or circuit name for corner cases
 	switch {
 	case strings.Contains(gpName, "Miami"):
 		return "US"
@@ -65,6 +61,5 @@ func CountryNameToCode(name, gpName, circuitName string) string {
 		return "US"
 	}
 
-	// No match found
 	return ""
 }

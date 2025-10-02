@@ -9,7 +9,6 @@ import (
 	"github.com/kashifulhaque/f1-tui/internal/models"
 )
 
-// ParseUTC parses Ergast date and time strings into UTC time
 func ParseUTC(date, t string) (time.Time, error) {
 	if t == "" {
 		return time.Time{}, errors.New("empty time")
@@ -29,12 +28,10 @@ func ParseUTC(date, t string) (time.Time, error) {
 	return time.Time{}, lastErr
 }
 
-// ToLocal converts UTC time to local time
 func ToLocal(t time.Time) time.Time {
 	return t.In(time.Local)
 }
 
-// ApproxEnd calculates approximate end time based on session type
 func ApproxEnd(kind string, start time.Time) time.Time {
 	switch kind {
 	case "Race":
@@ -46,7 +43,6 @@ func ApproxEnd(kind string, start time.Time) time.Time {
 	}
 }
 
-// BuildUISessions converts Race data to UI-friendly session format
 func BuildUISessions(r models.Race, season, round string, resultsURL func(string, string) string) ([]models.UISession, models.UISession, error) {
 	var sessions []models.UISession
 
@@ -89,7 +85,6 @@ func BuildUISessions(r models.Race, season, round string, resultsURL func(string
 		return nil, models.UISession{}, err
 	}
 
-	// Race
 	raceUTC, err := ParseUTC(r.Date, r.Time)
 	if err != nil {
 		return nil, models.UISession{}, err

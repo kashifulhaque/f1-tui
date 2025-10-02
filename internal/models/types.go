@@ -2,7 +2,6 @@ package models
 
 import "time"
 
-// Ergast API response structure
 type ErgastMRData struct {
 	RaceTable struct {
 		Season string `json:"season"`
@@ -41,7 +40,6 @@ type Session struct {
 	Time string `json:"time"`
 }
 
-// UI-specific session type
 type UISession struct {
 	Kind  string
 	Start time.Time

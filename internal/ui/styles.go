@@ -3,7 +3,6 @@ package ui
 import "github.com/charmbracelet/lipgloss"
 
 var (
-	// Primary colors matching Singapore GP UI
 	brightGreen = lipgloss.Color("#00FF87")  // Bright green for highlights
 	darkBg      = lipgloss.Color("#0A0E1A")  // Very dark background
 	mediumGray  = lipgloss.Color("#8B95A5")  // Muted gray for secondary text
@@ -20,6 +19,5 @@ var (
 	ErrorStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("#FF6B6B"))
 	RoundBadge    = lipgloss.NewStyle().Bold(true).Foreground(darkBg).Background(brightGreen).Padding(0, 1)
 
-	// Style for circuit ASCII art
 	CircuitStyle  = lipgloss.NewStyle().Foreground(brightGreen)
 )

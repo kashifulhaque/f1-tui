@@ -14,7 +14,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		s := msg.String()
 
-		// If in results view, handle back navigation
 		if m.showResults {
 			switch s {
 			case "esc", "q", "backspace":
@@ -24,13 +23,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "ctrl+c":
 				return m, tea.Quit
 			}
-			// Allow scrolling in results
 			var cmd tea.Cmd
 			m.resultsTbl, cmd = m.resultsTbl.Update(msg)
 			return m, cmd
 		}
 
-		// Main view navigation
 		switch s {
 		case "ctrl+c", "q":
 			return m, tea.Quit
@@ -47,7 +44,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					sessionName := selectedRow[0]
 					r := m.races[m.idx]
 
-					// Show loading and fetch results
 					m.showResults = true
 					m.resultsView = models.ResultsView{
 						SessionName: sessionName,
@@ -73,7 +69,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	    m.resultsView.SessionName = msg.sessionName
 	    m.resultsView.RaceName = msg.raceName
 
-	    // Build table rows
 	    rows := []table.Row{}
 	    for _, res := range msg.results {
 	        rows = append(rows, table.Row{
@@ -81,7 +76,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	            res.Driver,
 	            res.Constructor,
 	            res.Time,
-	            res.Points,  // Add points column
+	            res.Points,
 	        })
 	    }
 	    m.resultsTbl.SetRows(rows)
@@ -111,7 +106,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	// Delegate to table for navigation
 	var cmd tea.Cmd
 	m.tbl, cmd = m.tbl.Update(msg)
 	return m, cmd

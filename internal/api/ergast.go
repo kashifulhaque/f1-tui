@@ -12,7 +12,6 @@ import (
 
 const ergastBase = "http://api.jolpi.ca/ergast/f1"
 
-// FetchCurrentSchedule retrieves the current F1 season schedule
 func FetchCurrentSchedule(ctx context.Context) ([]models.Race, error) {
 	url := fmt.Sprintf("%s/current.json", ergastBase)
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -39,7 +38,6 @@ func FetchCurrentSchedule(ctx context.Context) ([]models.Race, error) {
 	return outer.MRData.RaceTable.Races, nil
 }
 
-// ResultsURL generates the results URL for a specific race
 func ResultsURL(season, round string) string {
 	return fmt.Sprintf("https://motorsportstats.com/results/formula-one/%s/round-%s", season, round)
 }
@@ -107,7 +105,6 @@ func FetchSessionResults(ctx context.Context, season, round, sessionType string)
             })
         }
     } else {
-        // Race or Sprint results
         raceTable := mrData["RaceTable"].(map[string]interface{})
         races := raceTable["Races"].([]interface{})
         if len(races) == 0 {
@@ -132,7 +129,6 @@ func FetchSessionResults(ctx context.Context, season, round, sessionType string)
                 time = t["time"].(string)
             }
 
-            // Add points for Race results
             points := ""
             if sessionType == "Race" {
                 if p, ok := result["points"].(string); ok {
@@ -146,7 +142,7 @@ func FetchSessionResults(ctx context.Context, season, round, sessionType string)
                 Constructor: constructor["name"].(string),
                 Time:        time,
                 Status:      result["status"].(string),
-                Points:      points,  // New field
+                Points:      points,
             })
         }
     }
