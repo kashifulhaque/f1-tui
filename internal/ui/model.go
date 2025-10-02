@@ -53,7 +53,7 @@ type toggleCircuitMsg struct{}
 func InitialModel() Model {
 	columns := []table.Column{
 		{Title: "Session", Width: 18},
-		{Title: "Local Time", Width: 22},
+		{Title: "Local Time", Width: 30},
 	}
 	t := table.New(table.WithColumns(columns), table.WithFocused(true))
 	t.SetHeight(9)
