@@ -32,6 +32,7 @@ type Model struct {
 	resultsView    models.ResultsView
 	resultsTbl     table.Model
 	resultsSession models.UISession
+	initCmd        tea.Cmd
 }
 
 type dataMsg struct {
@@ -79,6 +80,9 @@ func InitialModel() Model {
 }
 
 func (m Model) Init() tea.Cmd {
+	if m.initCmd != nil {
+		return m.initCmd
+	}
 	return fetchCmd()
 }
 
