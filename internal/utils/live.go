@@ -16,7 +16,7 @@ type driverProfile struct {
 	Team string
 }
 
-// Snapshot of the 2024 grid for deterministic live timing simulation.
+// Snapshot of a recent grid (2024 season) for deterministic live timing simulation.
 var liveDrivers = []driverProfile{
 	{Name: "Max Verstappen", Team: "Red Bull"},
 	{Name: "Sergio Perez", Team: "Red Bull"},
@@ -40,11 +40,24 @@ var liveDrivers = []driverProfile{
 	{Name: "Logan Sargeant", Team: "Williams"},
 }
 
-const progressJitter = 0.3
+const (
+	// progressJitter controls how much progress variance to add to the session completion ratio.
+	progressJitter = 0.3
+	// refreshStepSeconds controls how often the live timing shuffle changes (in seconds).
+	refreshStepSeconds = 5
+	// gapBaseSeconds is the minimum per-car gap for simulated timing (in seconds).
+	gapBaseSeconds = 0.25
+	// gapVarianceSeconds adds extra randomized gap variance (in seconds).
+	gapVarianceSeconds = 1.4
+	// speedBaseKmh is the baseline speed used for simulated timing (in km/h).
+	speedBaseKmh = 295
+	// speedVarianceKmh is the max random speed variance (in km/h).
+	speedVarianceKmh = 38
+)
 
 func GenerateLiveTiming(session models.UISession, now time.Time) []models.DriverResult {
 	seed := sessionSeed(session)
-	step := now.Unix() / 5
+	step := now.Unix() / refreshStepSeconds
 	rng := rand.New(rand.NewSource(seed + step))
 
 	drivers := make([]driverProfile, len(liveDrivers))
@@ -59,10 +72,13 @@ func GenerateLiveTiming(session models.UISession, now time.Time) []models.Driver
 	gapSeconds := 0.0
 	for i, d := range drivers {
 		if i > 0 {
-			gapSeconds += 0.25 + rng.Float64()*1.4
+			gapSeconds += gapBaseSeconds + rng.Float64()*gapVarianceSeconds
 		}
-		progress := math.Mod(sessionProgress+rng.Float64()*progressJitter, 1.0)
-		speed := 295 + rng.Float64()*38
+		progress := sessionProgress + rng.Float64()*progressJitter
+		if progress > 1 {
+			progress = 1
+		}
+		speed := speedBaseKmh + rng.Float64()*speedVarianceKmh
 		gap := "Leader"
 		if i > 0 {
 			gap = fmt.Sprintf("+%.3fs", gapSeconds)

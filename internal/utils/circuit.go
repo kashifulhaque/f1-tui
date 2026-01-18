@@ -12,8 +12,11 @@ import (
 )
 
 const (
+	// circuitWidth/circuitHeight define the SVG canvas size used by chafa rendering.
 	circuitWidth  = 200
 	circuitHeight = 120
+	// circuitStrokeColor controls the SVG track outline color (tuned for dark terminals).
+	circuitStrokeColor = "#ffffff"
 )
 
 var asciiCircuits = []string{
@@ -40,7 +43,7 @@ func FetchCircuitSVG(wikiURL string) string {
 	}
 
 	svg := buildCircuitSVG(seed)
-	if err := os.WriteFile(path, []byte(svg), 0o600); err != nil {
+	if err := os.WriteFile(path, []byte(svg), 0o644); err != nil {
 		return ""
 	}
 	return path
@@ -97,12 +100,13 @@ func buildCircuitSVG(seed uint64) string {
 	path.WriteString(" Z")
 
 	return fmt.Sprintf(
-		`<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d"><path d="%s" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+		`<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d"><path d="%s" fill="none" stroke="%s" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
 		circuitWidth,
 		circuitHeight,
 		circuitWidth,
 		circuitHeight,
 		path.String(),
+		circuitStrokeColor,
 	)
 }
 
