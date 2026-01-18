@@ -40,9 +40,8 @@ func (m Model) View() string {
 	}
 
 	left := RoundBadge.Render(fmt.Sprintf("ROUND %s", r.Round)) + "\n" +
-			GPStyle.Render(fmt.Sprintf("%s%s", flag, r.RaceName)) + "\n" +
-			LabelStyle.Render(fmt.Sprintf("%s", r.Circuit.CircuitName)) + "\n"
-
+		GPStyle.Render(fmt.Sprintf("%s%s", flag, r.RaceName)) + "\n" +
+		LabelStyle.Render(r.Circuit.CircuitName) + "\n"
 
 	// Race card
 	live := time.Now().After(m.race.Start) && time.Now().Before(m.race.End)
@@ -66,15 +65,8 @@ func (m Model) View() string {
 			fmt.Sprintf("Location: %s, %s", c.Location.Locality, c.Location.Country),
 		}
 		circuit = lipgloss.NewStyle().MarginTop(1).Render(strings.Join(facts, "\n"))
-
-		if utils.HasChafa() {
-			outline := utils.FetchCircuitSVG(c.URL)
-			if outline != "" {
-				art := utils.RenderWithChafa(outline)
-				if art != "" {
-					circuit += "\n\n" + art
-				}
-			}
+		if art := utils.RenderCircuitDiagram(c.URL); art != "" {
+			circuit += "\n\n" + art
 		}
 	}
 
@@ -104,31 +96,46 @@ func (m Model) View() string {
 }
 
 func (m Model) renderResultsView() string {
-    if m.resultsView.Loading {
-        return TitleStyle.Render("Loading Results...") + "\n" +
-            LabelStyle.Render("Fetching session data...")
-    }
+	if m.resultsView.Loading {
+		message := "Fetching session data..."
+		if m.resultsView.Live {
+			message = "Generating live timing..."
+		}
+		return TitleStyle.Render("Loading Results...") + "\n" +
+			LabelStyle.Render(message)
+	}
 
-    if m.resultsView.Error != nil {
-        // Check if race is currently live
-        now := time.Now()
-        isLive := now.After(m.race.Start) && now.Before(m.race.End)
+	if m.resultsView.Error != nil {
+		// Check if race is currently live
+		now := time.Now()
+		isLive := now.After(m.race.Start) && now.Before(m.race.End)
 
-        errorMsg := m.resultsView.Error.Error()
-        if isLive && m.resultsView.SessionName == "Race" {
-            errorMsg = "Live timing not available - results will appear after race completion"
-        }
+		errorMsg := m.resultsView.Error.Error()
+		if m.resultsView.Live || (isLive && m.resultsView.SessionName == "Race") {
+			errorMsg = "Live timing not available - results will appear after session completion"
+		}
 
-        return TitleStyle.Render(m.resultsView.RaceName) + "\n" +
-            GPStyle.Render(m.resultsView.SessionName) + "\n" +
-            LabelStyle.Render(errorMsg) + "\n" +
-            LabelStyle.Render("Press ESC or Q to go back")
-    }
+		return TitleStyle.Render(m.resultsView.RaceName) + "\n" +
+			GPStyle.Render(m.resultsView.SessionName) + "\n" +
+			LabelStyle.Render(errorMsg) + "\n" +
+			LabelStyle.Render("Press ESC or Q to go back")
+	}
 
-    header := TitleStyle.Render(m.resultsView.RaceName) + "\n" +
-        GPStyle.Render(m.resultsView.SessionName + " Results") + "\n\n"
+	header := TitleStyle.Render(m.resultsView.RaceName) + "\n" +
+		GPStyle.Render(m.resultsView.SessionName+resultsHeaderSuffix(m.resultsView.Live)) + "\n\n"
 
-    footer := "\n" + LabelStyle.Render("↑/↓ scroll • ESC/Q go back • Ctrl+C quit")
+	if m.resultsView.Live && !m.resultsView.UpdatedAt.IsZero() {
+		header += LabelStyle.Render("Updated "+m.resultsView.UpdatedAt.Format("15:04:05")) + "\n\n"
+	}
 
-    return header + m.resultsTbl.View() + footer
+	footer := "\n" + LabelStyle.Render("↑/↓ scroll • ESC/Q go back • Ctrl+C quit")
+
+	return header + m.resultsTbl.View() + footer
+}
+
+func resultsHeaderSuffix(live bool) string {
+	if live {
+		return " Live Timing " + LiveBadge.Render("LIVE")
+	}
+	return " Results"
 }

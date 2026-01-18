@@ -58,13 +58,19 @@ type ResultsView struct {
 	Results     []DriverResult
 	Loading     bool
 	Error       error
+	Live        bool
+	UpdatedAt   time.Time
 }
 
 type DriverResult struct {
-	Position     string
-	Driver       string
-	Constructor  string
-	Time         string
-	Status       string
-	Points       string
+	Position    string
+	Driver      string
+	Constructor string
+	Time        string
+	Status      string
+	Points      string
+	Gap         string
+	Laps        string
+	Speed       string
+	Progress    string
 }
