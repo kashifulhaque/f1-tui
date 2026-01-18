@@ -7,6 +7,20 @@ import (
 	"github.com/kashifulhaque/f1-tui/internal/utils"
 )
 
+const (
+	simulatedRaceIndex       = 0
+	simulatedRaceName        = "Simulated Grand Prix"
+	simulatedCircuitName     = "Simulation Circuit"
+	simulatedCircuitURL      = "simulated://circuit"
+	simulatedCircuitLocality = "Copilot City"
+	simulatedCircuitCountry  = "Simuland"
+	simulatedCircuitLat      = "0"
+	simulatedCircuitLong     = "0"
+	raceStartOffset          = -15 * time.Minute
+	qualifyingStartOffset    = -10 * time.Minute
+	practiceStartOffset      = -5 * time.Minute
+)
+
 // NewSimulatedModel builds a model with deterministic local data for demo runs.
 func NewSimulatedModel(now time.Time) Model {
 	m := InitialModel()
@@ -15,7 +29,7 @@ func NewSimulatedModel(now time.Time) Model {
 
 	race := buildSimulatedRace(now)
 	m.races = []models.Race{race}
-	m.idx = 0
+	m.idx = simulatedRaceIndex
 	m.rebuild()
 
 	m.showResults = true
@@ -32,26 +46,26 @@ func NewSimulatedModel(now time.Time) Model {
 }
 
 func buildSimulatedRace(now time.Time) models.Race {
-	raceStart := now.UTC().Add(-15 * time.Minute)
-	qualifyingStart := now.UTC().Add(-10 * time.Minute)
-	practiceStart := now.UTC().Add(-5 * time.Minute)
+	raceStart := now.UTC().Add(raceStartOffset)
+	qualifyingStart := now.UTC().Add(qualifyingStartOffset)
+	practiceStart := now.UTC().Add(practiceStartOffset)
 
 	race := models.Race{
 		Season:        now.Format("2006"),
 		Round:         "1",
-		RaceName:      "Simulated Grand Prix",
+		RaceName:      simulatedRaceName,
 		Date:          raceStart.Format("2006-01-02"),
 		Time:          raceStart.Format("15:04:05Z"),
 		FirstPractice: sessionAt(practiceStart),
 		Qualifying:    sessionAt(qualifyingStart),
 	}
 
-	race.Circuit.CircuitName = "Simulation Circuit"
-	race.Circuit.URL = "simulated://circuit"
-	race.Circuit.Location.Locality = "Copilot City"
-	race.Circuit.Location.Country = "Simuland"
-	race.Circuit.Location.Lat = "0"
-	race.Circuit.Location.Long = "0"
+	race.Circuit.CircuitName = simulatedCircuitName
+	race.Circuit.URL = simulatedCircuitURL
+	race.Circuit.Location.Locality = simulatedCircuitLocality
+	race.Circuit.Location.Country = simulatedCircuitCountry
+	race.Circuit.Location.Lat = simulatedCircuitLat
+	race.Circuit.Location.Long = simulatedCircuitLong
 
 	return race
 }
