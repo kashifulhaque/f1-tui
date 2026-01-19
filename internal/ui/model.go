@@ -1,9 +1,9 @@
 package ui
 
 import (
-	"strconv"
 	"context"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -23,13 +23,16 @@ type Model struct {
 	idx           int
 	sessions      []models.SessionRow
 	race          models.UISession
+	sessionByName map[string]models.UISession
 	tbl           table.Model
 	showCircuit   bool
 	filter        textinput.Model
 
-	showResults   bool
-	resultsView   models.ResultsView
-	resultsTbl    table.Model
+	showResults    bool
+	resultsView    models.ResultsView
+	resultsTbl     table.Model
+	resultsSession models.UISession
+	initCmd        tea.Cmd
 }
 
 type dataMsg struct {
@@ -43,10 +46,18 @@ type resultsMsg struct {
 	results     []models.DriverResult
 }
 
+type liveResultsMsg struct {
+	sessionName string
+	raceName    string
+	results     []models.DriverResult
+	updated     time.Time
+}
+
 type resultsErrMsg struct{ err error }
 type errMsg struct{ err error }
 type refreshMsg struct{}
 type toggleCircuitMsg struct{}
+type liveTickMsg time.Time
 
 func InitialModel() Model {
 	columns := []table.Column{
@@ -56,16 +67,6 @@ func InitialModel() Model {
 	t := table.New(table.WithColumns(columns), table.WithFocused(true))
 	t.SetHeight(9)
 
-	resultColumns := []table.Column{
-		{Title: "Pos", Width: 4},
-		{Title: "Driver", Width: 24},
-		{Title: "Team", Width: 22},
-		{Title: "Time", Width: 16},
-		{Title: "Pts", Width: 4},
-	}
-	resultsTbl := table.New(table.WithColumns(resultColumns), table.WithFocused(true))
-	resultsTbl.SetHeight(20)
-
 	inp := textinput.New()
 	inp.Placeholder = "Filter by GP name…"
 	inp.Prompt = ""
@@ -73,12 +74,15 @@ func InitialModel() Model {
 	return Model{
 		loading:    true,
 		tbl:        t,
-		resultsTbl: resultsTbl,
+		resultsTbl: newResultsTable(false),
 		filter:     inp,
 	}
 }
 
 func (m Model) Init() tea.Cmd {
+	if m.initCmd != nil {
+		return m.initCmd
+	}
 	return fetchCmd()
 }
 
@@ -113,6 +117,18 @@ func fetchResultsCmd(season, round, sessionType, sessionName, raceName string) t
 	}
 }
 
+func fetchLiveResultsCmd(session models.UISession, raceName string) tea.Cmd {
+	return func() tea.Msg {
+		now := time.Now()
+		return liveResultsMsg{
+			sessionName: session.Kind,
+			raceName:    raceName,
+			results:     utils.GenerateLiveTiming(session, now),
+			updated:     now,
+		}
+	}
+}
+
 func (m *Model) selectIndex(i int) {
 	if i < 0 || i >= len(m.races) {
 		return
@@ -122,41 +138,68 @@ func (m *Model) selectIndex(i int) {
 }
 
 func (m *Model) rebuild() {
-    if len(m.races) == 0 {
-        return
-    }
+	if len(m.races) == 0 {
+		return
+	}
 
-    r := m.races[m.idx]
-    sessions, race, err := utils.BuildUISessions(r, r.Season, r.Round, api.ResultsURL)
-    if err != nil {
-        m.err = err
-        return
-    }
+	r := m.races[m.idx]
+	sessions, race, err := utils.BuildUISessions(r, r.Season, r.Round, api.ResultsURL)
+	if err != nil {
+		m.err = err
+		return
+	}
 
-    m.err = nil
-    m.season = r.Season
-    m.sessions = nil
+	m.err = nil
+	m.season = r.Season
+	m.sessions = nil
+	m.sessionByName = make(map[string]models.UISession)
 
-    allSessions := append(sessions, race)
+	allSessions := append(sessions, race)
 
-    for _, s := range allSessions {
-        m.sessions = append(m.sessions, models.SessionRow{
-            Title: s.Kind,
-            Time:  s.Start.Format("Mon 15:04 - 16:04"),
-        })
-    }
+	for _, s := range allSessions {
+		m.sessionByName[s.Kind] = s
+		m.sessions = append(m.sessions, models.SessionRow{
+			Title: s.Kind,
+			Time:  s.Start.Format("Mon 15:04 - 16:04"),
+		})
+	}
 
-    var rows []table.Row
-    for _, s := range allSessions {
-        rows = append(rows, table.Row{
-            s.Kind,
-            s.Start.Format("Jan _2 Mon 15:04") + " - " + s.End.Format("15:04"),
-        })
-    }
+	var rows []table.Row
+	for _, s := range allSessions {
+		rows = append(rows, table.Row{
+			s.Kind,
+			s.Start.Format("Jan _2 Mon 15:04") + " - " + s.End.Format("15:04"),
+		})
+	}
 
-    m.tbl.SetRows(rows)
-    m.tbl.GotoTop()
-    m.race = race
+	m.tbl.SetRows(rows)
+	m.tbl.GotoTop()
+	m.race = race
+}
+
+func newResultsTable(live bool) table.Model {
+	var resultColumns []table.Column
+	if live {
+		resultColumns = []table.Column{
+			{Title: "Pos", Width: 4},
+			{Title: "Driver", Width: 22},
+			{Title: "Gap", Width: 10},
+			{Title: "Laps", Width: 7},
+			{Title: "Speed", Width: 9},
+			{Title: "Track", Width: 18},
+		}
+	} else {
+		resultColumns = []table.Column{
+			{Title: "Pos", Width: 4},
+			{Title: "Driver", Width: 24},
+			{Title: "Team", Width: 22},
+			{Title: "Time", Width: 16},
+			{Title: "Pts", Width: 4},
+		}
+	}
+	resultsTbl := table.New(table.WithColumns(resultColumns), table.WithFocused(true))
+	resultsTbl.SetHeight(20)
+	return resultsTbl
 }
 
 func pickRelevantIndex(races []models.Race) int {

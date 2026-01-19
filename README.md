@@ -17,6 +17,7 @@ F1 TUI is a terminal-based application providing a rich interactive user interfa
 - Session list per GP showing Practice, Qualifying, Sprint, and Race events.
 - Detailed session results including driver position, team, time, status, and points.
 - Live race leaderboard refreshes every 5 seconds during live races.
+- Includes a built-in simulation script to preview live timing without waiting for race day.
 - Keyboard shortcuts:
   - `←/→` Switch between different GPs (race rounds)
   - `↑/↓` Navigate session list or scroll results
@@ -46,6 +47,18 @@ go run .
 
 ---
 
+## Simulate a Race
+
+Use the simulation script to preview the live timing UI with deterministic local data:
+
+```
+go run ./scripts/simulate_race.go
+```
+
+The app will start in a simulated live race view (with the circuit diagram enabled). Press `ESC` to return to the schedule or `c` to toggle the circuit illustration.
+
+---
+
 ## Screenshots
 
 ### Main Schedule View with Flags and Sessions
@@ -55,6 +68,10 @@ go run .
 ### Detailed Race Results with Points
 
 ![Race Results](./assets/screenshots/race_results.png)
+
+### Simulated Live Timing View
+
+![Simulated Live Timing](./assets/screenshots/live_circuit_view.png)
 
 ---
 
